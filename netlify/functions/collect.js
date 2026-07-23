@@ -2,6 +2,8 @@ import { getEventStore, json, sanitizeText } from './_shared.js';
 
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
 
+const forbidden = []; 
+
 export default async (request) => {
     // 모든 응답에 공통으로 들어갈 CORS 헤더 정의
     const corsHeaders = {
