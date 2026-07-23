@@ -1,8 +1,221 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BLACKSITE // Authorized Security Operations</title><link rel="stylesheet" href="/assets/style.css"></head><body>
-<div class="shell"><aside class="side"><div class="brand">BLACKSITE</div><div class="sub">AUTHORIZED SECURITY OPS</div><nav class="nav"><a class="active" href="#dashboard">01 / DASHBOARD</a><a href="#generator">02 / CALLBACK GENERATOR</a><a href="#events">03 / EVENT LOG</a></nav><div class="sub" style="margin-top:28px">No credential collection<br>No cookie collection<br>Authorized tests only</div></aside>
-<main class="main"><div class="top"><div><h1>XSS CALLBACK CONTROL</h1><div class="muted">Execution-confirmation telemetry for approved assessments</div></div><div class="status">● SYSTEM ONLINE</div></div>
-<div class="notice">본 프로젝트는 승인된 진단에서 XSS 코드 실행 여부만 확인하도록 설계되었습니다. 쿠키, 세션, 비밀번호, 페이지 HTML 등 민감정보 수집은 서버에서 거부합니다.</div>
-<section id="dashboard" class="grid"><div class="card"><div class="muted">EVENTS LOADED</div><div class="metric" id="count">0</div></div><div class="card"><div class="muted">LAST CALLBACK</div><div class="metric" id="last" style="font-size:16px">-</div></div><div class="card"><div class="muted">ACTIVE CAMPAIGNS</div><div class="metric" id="campaignCount">0</div></div></section>
-<section id="generator" class="card" style="margin-top:14px"><h2>CALLBACK GENERATOR</h2><div class="row"><div><label>Campaign ID</label><input id="campaign" value="authorized-xss-001" maxlength="80"></div><div><label>Event type</label><select id="type"><option>xss-executed</option><option>email-link-opened</option><option>simulation-landing</option></select></div></div><label>Collector base URL</label><input id="baseUrl"><label>Generated JavaScript</label><div id="payload" class="code"></div><div style="margin-top:10px"><button id="copy">COPY CALLBACK</button></div></section>
-<section id="events" class="card" style="margin-top:14px"><div class="row"><div><h2>EVENT LOG</h2></div><div><label>Dashboard token</label><input id="token" type="password" placeholder="Netlify DASHBOARD_TOKEN"></div><div style="flex:0 0 auto"><button id="load">LOAD</button> <button id="clear" class="danger">CLEAR</button></div></div><div class="table-wrap"><table class="events"><thead><tr><th>TIME</th><th>CAMPAIGN</th><th>TYPE</th><th>PAGE</th><th>REFERRER</th><th>USER AGENT</th></tr></thead><tbody id="eventRows"><tr><td colspan="6" class="muted">Token 입력 후 LOAD</td></tr></tbody></table></div></section>
-</main></div><script src="/assets/app.js"></script></body></html>
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>BLACKSITE // Authorized Security Operations</title>
+
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+
+<body>
+  <div class="shell">
+
+    <aside class="side">
+      <div class="brand">BLACKSITE</div>
+      <div class="sub">AUTHORIZED SECURITY OPS</div>
+
+      <nav class="nav" aria-label="대시보드 메뉴">
+        <a class="active" href="#dashboard">
+          01 / DASHBOARD
+        </a>
+
+        <a href="#generator">
+          02 / CALLBACK GENERATOR
+        </a>
+
+        <a href="#events">
+          03 / EVENT LOG
+        </a>
+      </nav>
+
+      <div class="sub side-notice">
+        No credential collection<br>
+        No cookie collection<br>
+        Authorized tests only
+      </div>
+    </aside>
+
+    <main class="main">
+
+      <header class="top">
+        <div>
+          <h1>XSS CALLBACK CONTROL</h1>
+
+          <div class="muted">
+            Execution-confirmation telemetry for approved assessments
+          </div>
+        </div>
+
+        <div class="status">
+          ● SYSTEM ONLINE
+        </div>
+      </header>
+
+      <div class="notice">
+        본 프로젝트는 승인된 진단 대상에서 XSS 코드 실행 여부만
+        확인하도록 설계되었습니다.
+      </div>
+
+      <section id="dashboard" class="page-section">
+        <div class="section-heading">
+          <span class="section-number">01</span>
+
+          <div>
+            <h2>DASHBOARD</h2>
+            <p class="muted">
+              수신된 콜백 이벤트 현황
+            </p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card metric-card">
+            <div class="muted">EVENTS LOADED</div>
+            <div class="metric" id="count">0</div>
+          </div>
+
+          <div class="card metric-card">
+            <div class="muted">LAST CALLBACK</div>
+            <div class="metric metric-small" id="last">-</div>
+          </div>
+
+          <div class="card metric-card">
+            <div class="muted">ACTIVE CAMPAIGNS</div>
+            <div class="metric" id="campaignCount">0</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="generator" class="page-section">
+        <div class="section-heading">
+          <span class="section-number">02</span>
+
+          <div>
+            <h2>CALLBACK GENERATOR</h2>
+            <p class="muted">
+              승인된 진단 대상에 사용할 실행 확인용 콜백 생성
+            </p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="row">
+            <div>
+              <label for="campaign">Campaign ID</label>
+
+              <input
+                id="campaign"
+                value="authorized-xss-001"
+                maxlength="80"
+                autocomplete="off"
+              >
+            </div>
+
+            <div>
+              <label for="type">Event type</label>
+
+              <select id="type">
+                <option value="xss-executed">
+                  xss-executed
+                </option>
+
+                <option value="email-link-opened">
+                  email-link-opened
+                </option>
+
+                <option value="simulation-landing">
+                  simulation-landing
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <label for="baseUrl">Collector base URL</label>
+
+          <input
+            id="baseUrl"
+            autocomplete="off"
+            placeholder="https://example.netlify.app"
+          >
+
+          <label>Generated JavaScript</label>
+
+          <pre id="payload" class="code"></pre>
+
+          <div class="button-area">
+            <button id="copy" type="button">
+              COPY CALLBACK
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section id="events" class="page-section">
+        <div class="section-heading">
+          <span class="section-number">03</span>
+
+          <div>
+            <h2>EVENT LOG</h2>
+            <p class="muted">
+              수신 이벤트 조회 및 초기화
+            </p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="event-controls">
+            <div class="token-field">
+              <label for="token">Dashboard token</label>
+
+              <input
+                id="token"
+                type="password"
+                placeholder="Netlify DASHBOARD_TOKEN"
+                autocomplete="current-password"
+              >
+            </div>
+
+            <div class="control-buttons">
+              <button id="load" type="button">
+                LOAD
+              </button>
+
+              <button id="clear" type="button" class="danger">
+                CLEAR
+              </button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="events">
+              <thead>
+                <tr>
+                  <th>TIME</th>
+                  <th>CAMPAIGN</th>
+                  <th>TYPE</th>
+                  <th>PAGE</th>
+                  <th>REFERRER</th>
+                  <th>USER AGENT</th>
+                </tr>
+              </thead>
+
+              <tbody id="eventRows">
+                <tr>
+                  <td colspan="6" class="muted empty-row">
+                    Token 입력 후 LOAD
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="/assets/app.js"></script>
+</body>
+</html>
