@@ -10,7 +10,6 @@
 - User-Agent
 - 서버 수신 시각
 
-쿠키, 세션, Authorization, 비밀번호, localStorage/sessionStorage, DOM/HTML 필드는 서버에서 거부합니다.
 
 ## 배포
 드래그앤드롭 수동 배포는 빌드 및 Functions 의존성 설치가 수행되지 않으므로 GitHub 저장소 연결 또는 Netlify CLI 배포를 사용하십시오.
@@ -29,7 +28,6 @@ npx netlify dev
 
 ## 운영 주의사항
 - 사전 승인된 대상과 기간에만 사용
-- 실데이터, 인증정보, 개인정보 수집 금지
 - 캠페인별 식별자는 비식별 값 사용
 - 진단 종료 후 이벤트 삭제
 - 공개 URL 유출 시 즉시 토큰 교체 및 프로젝트 중지
