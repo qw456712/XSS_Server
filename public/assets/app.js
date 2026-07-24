@@ -46,7 +46,7 @@ function renderPayload() {
     `<script>` +
     `fetch('${baseUrl}/api/collect',{` +
     `method:'POST',` +
-    `headers:{'Content-Type':'application/json'},` +
+    // 💡 CORS 프리플라이트(OPTIONS) 요청을 발생시키지 않도록 headers 속성을 제거했습니다.
     `body:JSON.stringify({` +
     `campaign:'${campaign}',` +
     `type:'${eventType}',` +
