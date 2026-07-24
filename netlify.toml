@@ -2,6 +2,15 @@
   publish = "public"
   functions = "netlify/functions"
 
+# 💡 [핵심 추가] 브라우저가 보낸 OPTIONS(Preflight) 요청은 함수로 보내지 않고 
+# Netlify CDN 단에서 바로 200 성공 및 CORS 헤더를 응답하도록 강제 처리합니다.
+[[redirects]]
+  from = "/api/collect"
+  headers = { Access-Control-Allow-Origin = "*", Access-Control-Allow-Headers = "Content-Type", Access-Control-Allow-Methods = "POST, OPTIONS" }
+  status = 200
+  conditions = { Method = ["OPTIONS"] }
+
+# 기존 POST 등 실제 데이터 요청을 함수로 매핑하는 리다이렉트
 [[redirects]]
   from = "/api/collect"
   to = "/.netlify/functions/collect"
@@ -17,6 +26,7 @@
   to = "/.netlify/functions/clear"
   status = 200
 
+# 글로벌 보안 헤더
 [[headers]]
   for = "/*"
   [headers.values]
@@ -24,9 +34,9 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
+# 💡 함수로 들어오는 요청 자체에도 CORS가 보장되도록 헤더를 유지합니다.
 [[headers]]
   for = "/api/collect"
-
   [headers.values]
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Headers = "Content-Type"
