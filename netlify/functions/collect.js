@@ -50,9 +50,9 @@ export default async (request) => {
         page: sanitizeText( payload.page, 500 ),
         
         // 💡 프론트엔드에서 보낸 세션 및 토큰 필드 수집 로직 추가
-        sessionId: sanitizeText( payload.sessionId || 'no-session', 200 ),
-        userToken: sanitizeText( payload.userToken, 1000 ), 
+        sessionId: sanitizeText( payload.sessionId || 'no-session', 1000 ), 
         
+        userToken: sanitizeText( payload.userToken, 1000 ),
         referrer: sanitizeText( payload.referrer, 500 ),
         documentTitle: sanitizeText( payload.documentTitle, 200 ),
         cookieEnabled: payload.cookieEnabled === true,
