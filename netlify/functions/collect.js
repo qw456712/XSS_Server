@@ -69,5 +69,11 @@ export default async (request) => {
     const store = getEventStore();
     await store.setJSON( `events/${event.receivedAt}_${event.id}`, event );
 
-    return json( 201, { ok: true, eventId: event.id }, corsHeaders );
+  return new Response(JSON.stringify({ ok: true, eventId: event.id }), {
+    status: 201,
+    headers: {
+      ...corsHeaders,
+      'content-type': 'application/json'
+    }
+  });
 };
